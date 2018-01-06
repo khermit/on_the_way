@@ -1,5 +1,6 @@
 
-#####2018.01.06
+#####2018.01.06  
+
 | 学习内容      |    进度 |
 | :-------- | :--------:|
 |[学习kaggle的Titanic](http://blog.csdn.net/han_xiaoyang/article/details/49797143),数据预处理|70%
