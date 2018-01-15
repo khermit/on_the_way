@@ -70,6 +70,7 @@
         - export DOCKER_HOST="tcp://serverIP:2375" 访问远程
         - export DOCKER_HOST="" 访问本地
 #### Dockerfile指令：
+ - 详细指令可参照[官方文档](https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#env)
  - dockerfile中的CMD指令会被命令中的指令覆盖，但ENTRYPOINT不会被覆盖。
  - COPY 复制(源相对路径 目标绝对路径)
  - ```txt
