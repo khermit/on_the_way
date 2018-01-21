@@ -56,5 +56,13 @@ docker push 注册用户名/镜像名
 
 
 
+
+
+
+
+
+
+
+
   
 参考自：http://wiki.jikexueyuan.com/project/docker/userguide/dockerrepos.html

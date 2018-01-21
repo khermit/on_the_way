@@ -16,5 +16,5 @@
     ENV PATH ${JAVA_HOME}/bin:$PATH
     ```
  - 构建： docker built -t khermit/ubuntu_jdk .
- - 运行： docker run -it --name=ubuntu_jdk khermit/ubuntu_jdk /bin/bash
+ - 运行： docker run -it --name=ubuntu_jdk  khermit/ubuntu_jdk /bin/bash
  - 推送： docker push khermit/ubunut_jdk
