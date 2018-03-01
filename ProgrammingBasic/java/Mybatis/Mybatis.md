@@ -47,6 +47,13 @@ sqlMapConfig.xml
         <mapper resource="sqlmap/User.xml">
         <mapper resource="mapper/UserMapper.xml">
     </mappers>
+    <!--别名定义-->
+    <typeAliases>
+        <!--单个别名定义-->
+        <typeAliad type="org.quan.mybatis.User" alias="User" />
+        <!--批量别名定义:指定报名，mybatis自动扫描包中的po类，自动定义别名为类名（首字母大小写都可以）-->
+        <package name="org.quan.mybatis"/>
+    </typeAliases>
 ```
 
 mapper.xml
@@ -230,13 +237,16 @@ User user = userMapper.findUserById(2);
 #### SqlMapConfig.xml
 
 Mybatis的全局配置文件：
- - properties 属性：加载db.properties中的参数，例如数据库参数。属性加载顺序：
-    - 1、在properties元素体内定义的属性首先被读取
+ - properties 属性：加载db.properties中的参数，例如数据库参数。属性名建议为xx.xx.xx。属性加载顺序：
+    - 1、在properties元素体内定义的属性首先被读取（不建议使用）
     - 2、然后读取properties元素中resource或者url加载的属性，他会覆盖已读取的同名属性
     - 3、最后读取parameterType传递的属性，它会覆盖已读取的同名属性。
  - settings 全局配置参数
+    - 例如：开启二级缓存、开启延迟加载
  - typeAliases 类型别名
+    - 在输入输出参数类型时，可以用别名代替，以防名字过长。mybatis有内置别名。
  - typeHandles 类型处理器
+    - 完成jdbc类型和java类型的转换。mybatis提供的类型一般都满足需要，不需要自定义。
  - objectFactory 对象工厂
  - plugins 插件
  - environments 环境集合属性对象
@@ -244,3 +254,155 @@ Mybatis的全局配置文件：
         - transactionManager 事务管理
         - dataSource 数据源
  - mappers 映射器 
+    - 1、通过Resource加载单个映射文件
+    - 2、通过mapper接口加载：
+        - 使用mapper代理方法
+        - mapper接口类名和mapper.xml映射文件名称一致，且在同一个目录
+        - <mapper class="org.quan.mybatis.mapper.UserMapper"/>
+     -3、批量加载（必须遵循2的规范,推荐使用）：
+        <package name="org.quan.mybatis.mapper"/>
+
+#### 输入映射
+
+通过parameterType指定输入参数的类型
+
+##### 传递pojo的包装对象
+需求：传入的查询条件很复杂,用户信息综合查询，通常需要关联查询
+解决：将负责的查询条件进行pojo包装
+
+建立包装类型：
+UserQueryVo.java
+```java
+public class UserQueryVo {
+    //在这里包装所需要的查询条件
+
+    //用户查询条件
+    private User user;
+    ...
+}
+```
+
+UserCustom.java
+```java
+public class UserCustom {
+
+}
+```
+
+
+
+mapper.xml
+```xml
+<select id="findUserList" parameterType="org.quan.mybatis.po.UserQueryVo redultType="org.quan.mybatis.po.UserCustom">
+    SELECT * FROM USER WHERE user.gender=#{userCustom.gender} AND user.username LIKE '%${userCustom.username}%'
+</select>
+```
+
+UserMapper.xml
+```java
+public interface UserMapper {
+    public List<UserCustom> findUserList(UserQueryVo UserQueryVo) throws Exception;
+}
+```
+
+test.java
+```java
+UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+//创建包装对象，设置查询条件
+UserQueryVo userQueryVo = new UserQueryVo();
+UserCustom userCustom = new UserCustom();
+userCustom.setGender("1");
+userCustom.setUsername("Duke");
+userQueryVo.setUserCustom(userCustom);
+//调用
+List<UserCustom> list = userMapper.findUserList(userQueryVo);
+```
+
+#### 输出映射
+##### resultType
+ - 只有查询出来的列名和pojo类中的属性名一致，才会映射成功（创建pojo对象）。
+
+##### resultMap
+ - 如果查询出来的列名和pojo的属性名不一致,则通过定义一个resultMap对列名和pojo属性名之间坐一个映射关系。
+
+mapper.xml
+```xml
+<!--定义resultMap ：返回的java类、唯一标识-->
+<resultMap type="user" id="userResultMap2">
+    <!--id：查询结果集中的唯一标识，将查询出来的id_列名和pojo的id属性进行映射-->
+    <id column="id_" property="id"/>
+    <!--result: 对普通列名进行映射-->
+    <result column="username_" property="username"/>
+</resultMap>
+
+<select id="findUserByIdResultMap" parameterType="int" userResultMap="userResultMap2">
+    SELECT id id_, username username_ FROM USERR WHERE id=#{value}
+</select>
+```
+
+在mapper.java中定义好接口
+```java
+public User findUserByIdResultMap(int id) throws Exception;
+```
+
+#### 动态sql
+通过表达式进行判断，对sql进行灵活拼接、组装
+
+需求： 对查询条件进行判断，如果输入参数不为空才进行查询拼接
+
+mapper.xml
+```xml
+<select id="findUserList" parameterType="org.quan.mybatis.po.UserQueryVo redultType="org.quan.mybatis.po.UserCustom">
+    SELECT * FROM USER 
+    <!--where 可以自动去掉条件中的第一个and-->
+    <where>
+        <if test="userCustom!=null">
+            <if test="userCustom.gender!=null and userCustom.gender!=null">
+                and user.gender = #{userCustom.gender}
+            </if>
+            <if test="userCustom.username!=null and userCustom.username!=null">
+                and user.username = #{userCustom.username}
+            </if>
+        </if>
+    </where>
+    WHERE user.gender=#{userCustom.gender} AND user.username LIKE '%${userCustom.username}%'
+</select>
+```
+
+在调用时，如果不设置gender，则条件不会拼接在sql中
+
+
+##### sql片段
+需求：将上边实现的动态sql判断代码块抽取出来，组成一个sql片段，其他的statement中就可以引用sqlp片段。  
+经验：
+ - 基于单表来定义sql片段，提高可重用性
+ - 在sql片段中不要包括where
+
+
+```xml
+<!--定义sql片段 id:唯一标识-->
+<sql id="query_user_where">
+    <if test="userCustom!=null">
+            <if test="userCustom.gender!=null and userCustom.gender!=null">
+                and user.gender = #{userCustom.gender}
+            </if>
+            <if test="userCustom.username!=null and userCustom.username!=null">
+                and user.username = #{userCustom.username}
+            </if>
+        </if>
+</sql>
+
+<!--使用sql片段-->
+<select id="findUserList" parameterType="org.quan.mybatis.po.UserQueryVo redultType="org.quan.mybatis.po.UserCustom">
+    SELECT * FROM USER 
+    <!--where 可以自动去掉条件中的第一个and-->
+    <where>
+        <!--应用sql片段，如果不在本文件，则前面加上namespace-->
+        <include refid="query_user_where"></include>
+    </where>
+    WHERE user.gender=#{userCustom.gender} AND user.username LIKE '%${userCustom.username}%'
+</select>
+```
+
+##### foreach
+向sql传递数组或者list，使用foreach解析
