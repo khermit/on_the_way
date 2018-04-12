@@ -77,7 +77,7 @@ list类型就是一个双向链表，通过push,pop操作从链表的头部或�
 
 ![election_36](assets/Selection_365.png)
 
-### 4. 持久化
+## 4. 持久化
 
 #### (1)snap shotting 快照持久化
 
@@ -111,5 +111,8 @@ aof备份文件做优化处理（合并类似的指令）：./redis-cli bgrewrit
 
 
 
-### 5. 主从模式
+## 5. 主从模式
 
+主redis:写入　；从redis:查
+
+配置文件：slaveof ipaddr port　重启后，作为ipaddr:port的slave，默认禁止写操作。
