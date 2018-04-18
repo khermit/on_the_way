@@ -25,7 +25,7 @@ df[(df['PCTL']<0.95) & (df['PCTL']>0.05)]
    2. data[['column1', 'column2']]　多列选择
    3. data[:7][['column1', 'column2'\]\] 区块选择
 2. loc：按照索引选取。建议使用loc，而不是[].[原因](http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy)
-   1. data.locp[1:5] 多行选择，选择1-5
+   1. data.loc[1:5] 多行选择，选择1-5
    2. data.loc[2:4, ['column1', 'column2']] 区块选择
    3. data.loc[date1:date2] date=dt.datetime(2013,1,1)　选择连个特定日期之间的数据。
 3. iloc: 按照位置选择
@@ -35,7 +35,7 @@ df[(df['PCTL']<0.95) & (df['PCTL']>0.05)]
 4. at:与loc类似，速度更快，但只能访问单个元素。
    1. data.at['index2', 'column3']
 5. iat:与iloc类似，速度更快，但只能访问单个元素。
-   1. data.iat[1][2\]
+   1. data.iat[1,2\]
 6. ix:允许不在dataframe索引中的数据。既可以通过位置，也可以通过标签。效率较低。
    1. data.ix[date1:date2]　查找这之间的数据，但date1和date2可以不在dataframe中。
 
