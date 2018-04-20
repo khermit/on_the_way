@@ -25,6 +25,12 @@ data = data.drop_duplicates(['k']) 根据第k列去重
 df = df.drop_duplicates(['ltime'],keep='last') #根据时间去重，保留最后一次观测值
 ```
 
+删除：
+
+
+
+
+
 
 
 ## 查找
