@@ -1,3 +1,5 @@
+###　动态规划
+
 ### 70. Climbing Stairs
 
 [Description](https://leetcode.com/problems/climbing-stairs/description/)[Hints](https://leetcode.com/problems/climbing-stairs/hints/)[Submissions](https://leetcode.com/problems/climbing-stairs/submissions/)[Discuss](https://leetcode.com/problems/climbing-stairs/discuss/)[Solution](https://leetcode.com/problems/climbing-stairs/solution/)
@@ -18,7 +20,6 @@ Each time you can either climb 1 or 2 steps. In how many distinct ways can you c
 Input: 2
 Output:  2
 Explanation:  There are two ways to climb to the top.
-
 1. 1 step + 1 step
 2. 2 steps
 ```
@@ -265,6 +266,8 @@ Given a list of non-negative integers representing the amount of money of each h
 ```c++
 class Solution {
 private:
+  
+  
   	//考虑抢劫nums[index...nums.size())这个范围的所有房子
     int tryRob( vector<int> &nums, int index ){
         if( index >= nums.size() )
@@ -310,12 +313,17 @@ public:
 };
 ```
 
+
+
 动态规划：
 
 ```c++
 class Solution {
-
 public:
+  
+  
+  
+  
     int rob(vector<int>& nums) {
         int n = nums.size();
         if( 0 == n )
@@ -327,7 +335,6 @@ public:
           	//计算memo[i]
             for( int j=i; j<n; j++ )
                 memo[i] = max( memo[i], nums[j] + (j+2 < n ? memo[j+2] : 0) );
-        
         return memo[0];
     }
 };
@@ -415,6 +422,8 @@ class Knapsack01{
 }
 ```
 
+
+
 自低向上（具体分析）：
 
 在一个容量为５的背包中放入物品id为0,1,2的过程，二维辅助数组中，每一行为第i个物品，每一列为对应物品的背包的剩余容量，值表示第i个物品对于背包容量的最大价值。首先，对于第0个物品，0容量的背包不能放，1容量的背包可以放，故$[0][1]$的最大价值为６.因为只有一个物品，所有后面背包容量大的也只能放一个物品，价值最大都为６.
@@ -442,18 +451,19 @@ $[i][j] = max　{ [i-1][j], [i-1][背包容量－当前物品容量] }$
 ```c++
 class Knapsack01{
   public:
+  
   int knapsack01(const vector<int> &w, const vector<int> &v, int C){
     assert( w.size() == v.size() );
     int n = w.size();
     if( 0==n )
       return 0;
     vector<vector<int>> memo(n, vector<int>(C+1, -1));
-    for(int i=0; i<=C; i++) //基础问题，ｉ代表容量。放入第０个物品，放不下则为０
+    for(int i=0; i<=C; i++)    //基础问题，ｉ代表容量。放入第０个物品，放不下则为０
       memo[0][i] = ( i>=w[0] ? v[0] : 0 );
-    for(int i=0; i<n; i++)　// i代表第i个物品
+    for(int i=0; i<n; i++)　   // i代表第i个物品
       for(int j=0; j<=C; j++){ // j代表容量
-        memo[i][j] = memo[i-1][j]; //不放第i个物品
-        if(j>=w[i]) // 如果容量允许，则放入第i个物品
+        memo[i][j] = memo[i-1][j];  //不放第i个物品
+        if(j>=w[i])            // 如果容量允许，则放入第i个物品
           memo[i][j] = max( memo[i][j], v[i] + memo[i-1][j-w[i]] );
       }
     return memo[n-1][C];
@@ -476,7 +486,7 @@ class Knapsack01{
     if( 0==n )
       return 0;
     vector<vector<int>> memo(2, vector<int>(C+1, -1));
-    for(int i=0; i<=C; i++)           　　　//基础问题，ｉ代表容量。放入第０个物品，放不下则为０
+    for(int i=0; i<=C; i++)           　//基础问题，ｉ代表容量。放入第０个物品，放不下则为０
       memo[0][i] = ( i>=w[0] ? v[0] : 0 );
     for(int i=0; i<n; i++)　          　　　 // i代表第i个物品
       for(int j=0; j<=C; j++){       　　　  // j代表容量
@@ -514,10 +524,10 @@ class Knapsack01{
     if( 0==n )
       return 0;
     vector<int> memo(C+1, -1);
-    for(int i=0; i<=C; i++)           　　　//基础问题，ｉ代表容量。放入第０个物品，放不下则为０
+    for(int i=0; i<=C; i++)           　//基础问题，ｉ代表容量。放入第０个物品，放不下则为０
       memo[i] = ( i>=w[0] ? v[0] : 0 );
     for(int i=0; i<n; i++)　          　　　 
-      for(int j=C; j>=w[i]; j--){       　　　//从右变开始，直到当前容量放不下该物品时结束。
+      for(int j=C; j>=w[i]; j--){       　//从右变开始，直到当前容量放不下该物品时结束。
           memo[j] = max( memo[j], v[i] + memo[j-w[i]] );
       }
     return memo[C];
@@ -544,15 +554,12 @@ class Knapsack01{
 
 Given an unsorted array of integers, find the length of longest increasing subsequence.
 
-For example,
 Given `[10, 9, 2, 5, 3, 7, 101, 18]`,
 The longest increasing subsequence is `[2, 3, 7, 101]`, therefore the length is `4`. Note that there may be more than one LIS combination, it is only necessary for you to return the length.
 
 Your algorithm should run in O(*n2*) complexity.
 
 **Follow up:** Could you improve it to O(*n* log *n*) time complexity?
-
-
 
 **暴力**：选择所有的子序列进行判断　O((2^n)*n)
 
@@ -645,8 +652,6 @@ LIS问题的O(nlogn)解法，不属于动态规划
 
 **状态转移**：　shortestPath(x) = min( shortestPath(a) + w(a->x) )　ａ的最短路径＋ａ到达x的路径(对于所有可以到达x的a)。
 
-
-
 ### 416. Partition Equal Subset Sum
 
 [Description](https://leetcode.com/problems/partition-equal-subset-sum/description/)[Hints](https://leetcode.com/problems/partition-equal-subset-sum/hints/)[Submissions](https://leetcode.com/problems/partition-equal-subset-sum/submissions/)[Discuss](https://leetcode.com/problems/partition-equal-subset-sum/discuss/)[Solution](https://leetcode.com/problems/partition-equal-subset-sum/solution/)
@@ -665,20 +670,14 @@ Given a **non-empty** array containing **only positive integers**, find if the a
 **Example 1:**
 
 ```
-Input: [1, 5, 11, 5]
-
-Output: true
-
+Input: [1, 5, 11, 5]       Output: true
 Explanation: The array can be partitioned as [1, 5, 5] and [11].
 ```
 
 **Example 2:**
 
 ```
-Input: [1, 2, 3, 5]
-
-Output: false
-
+Input: [1, 2, 3, 5]  Output: false
 Explanation: The array cannot be partitioned into equal sum subsets.
 ```
 
@@ -689,8 +688,6 @@ Explanation: The array cannot be partitioned into equal sum subsets.
 **状态转移**：F(i,c) = F(i-1,c) || F(i-1, c-w(i)) （不用i填，用i填）
 
 时间复杂度：O(n*sum/2)=O(n\*sum)
-
-
 
 递归（自顶向下）：
 
@@ -712,7 +709,6 @@ public:
             sum += nums[i];
         if( sum%2 !=0 )
             return false;
-        
         return tryPartition( nums, nums.size()-1, sum/2 );
     }
 };
@@ -732,11 +728,11 @@ private:
             return true;
         if( sum<0 || index<0 )
             return false;
-        
         if( memo[index][sum] != -1 )
             return memo[index][sum] == 1;
-        
+      
         memo[index][sum] = (tryPartition(nums, index-1, sum) || tryPartition(nums, index-1, sum-nums[index])) ? 1 : 0;
+      
         return memo[index][sum] == 1;
     }
 public:
