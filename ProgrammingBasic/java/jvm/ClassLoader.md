@@ -77,3 +77,84 @@ JVM中的ClassLoader：
 ![election_47](assets/Selection_474.png)
 
 如上代码：加载类首先在已加载中的类去找，如果没有找到，则让其parent去加载。
+
+强制在apploader中加载：
+
+![election_47](assets/Selection_475.png)
+
+defineClass是protected，通过反射调用。
+
+加上参数 -Xbootclasspath/a:D:/tmp/clz
+
+双亲模式的问题：顶层ClassLoader无法加载底层ClassLoader的类。即bootstrap classloader无法看到app classloader加载的类。
+
+![election_47](assets/Selection_476.png)
+
+解决方案：上下文加载器Thread.setContextClassLoader()
+
+- 是一个角色
+- 用以解决顶层classloader无法访问底层classloader的类的问题
+- 基本思想：在顶层classloader中，传入classloader的实例
+
+双亲模式是默认的，但不是必须的：
+
+- Tomcat的WebappClassloader就会先加载自己的class,找不到在委托parent
+- OSGI的classloader形参网状结构，根据需要自由加载class
+
+```java
+protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    // First, check if the class has already been loaded
+    Class re=findClass(name);
+    if(re==null){
+        System.out.println(“无法载入类:”+name+“ 需要请求父加载器");
+        return super.loadClass(name,resolve);
+    }
+    return re;
+}
+```
+
+```java
+protected Class<?> findClass(String className) throws ClassNotFoundException {
+  Class clazz = this.findLoadedClass(className);
+  if (null == clazz) {
+      try {
+          String classFile = getClassFile(className);
+          FileInputStream fis = new FileInputStream(classFile);
+          FileChannel fileC = fis.getChannel();
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          WritableByteChannel outC = Channels.newChannel(baos);
+          ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
+          ...
+          fis.close();
+          byte[] bytes = baos.toByteArray();
+
+          clazz = defineClass(className, bytes, 0, bytes.length);
+      } catch (FileNotFoundException e) {
+          e.printStackTrace();
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+  }
+  return clazz;
+}
+```
+
+```java
+OrderClassLoader myLoader=new OrderClassLoader("D:/tmp/clz/");
+Class clz=myLoader.loadClass("geym.jvm.ch6.classloader.DemoA");
+System.out.println(clz.getClassLoader());
+
+System.out.println("==== Class Loader Tree ====");
+ClassLoader cl=myLoader;
+while(cl!=null){
+    System.out.println(cl);
+    cl=cl.getParent();
+}
+```
+
+
+
+热替换：当一个class被替换后，系统无需重启，替换的类立即生效。通过classloader实现。
+
+
+
