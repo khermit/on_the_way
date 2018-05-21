@@ -27,6 +27,12 @@ df = df.drop_duplicates(['ltime'],keep='last') #根据时间去重，保留最�
 
 删除：
 
+```py
+//删除列
+df2 = df.drop(['MonthlyIncome'],axis=1)
+dfR.drop(['aptime'], axis=1, inplace=True)
+```
+
 
 
 
