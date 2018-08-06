@@ -1,3 +1,13 @@
+### 递归与回溯
+
+复杂度分析：
+
+每次递归的规模都一样
+
+![election_50](assets/Selection_509.png)
+
+![election_51](assets/Selection_510.png)
+
 ### 17. Letter Combinations of a Phone Number
 
 [Description](https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/)[Hints](https://leetcode.com/problems/letter-combinations-of-a-phone-number/hints/)[Submissions](https://leetcode.com/problems/letter-combinations-of-a-phone-number/submissions/)[Discuss](https://leetcode.com/problems/letter-combinations-of-a-phone-number/discuss/)[Solution](https://leetcode.com/problems/letter-combinations-of-a-phone-number/solution/)
@@ -32,7 +42,6 @@ Although the above answer is in lexicographical order, your answer could be in a
 
 ```c++
 class Solution {
-    
 private:
     const string letterMap[10] = {
         " ",
@@ -46,35 +55,25 @@ private:
         "tuv",
         "wxyz",
     };
-    
     vector<string> res;
-    
   	//　s中保存了此时从digits[0...index-1]翻译得到的一个字母字符串
   	// 寻找和digits[index]匹配的字母，获得digits[0...index]翻译的到的解
     void findCombination(const string &digits, int index, const string &s){
-        
         if( index == digits.size() )
-          	//处理完毕　保存结果
-            res.push_back(s);
+            res.push_back(s);//处理完毕　保存结果
             return;
-        
         char c = digits[index];
         string letters = letterMap[c-'0'];
         for(int i=0; i<letters.size(); i++)
             findCombination(digits, index+1, s + letters[i]);
         return;
     }
-    
 public:
-    vector<string> letterCombinations(string digits) {
-        
-        res.clear();
-        
+    vector<string> letterCombinations(string digits) {    
+        res.clear();   
         if(digits == "")
-            return res;
-        
-        findCombination(digits, 0, "");
-        
+            return res;  
+        findCombination(digits, 0, "");     
         return res;
     }
 };
@@ -83,8 +82,6 @@ public:
 93:返回所有合法的ip地址，分割数字
 
 131:拆分字符串，拆分的字符串为回文
-
-
 
 ### 46. Permutations（回溯处理排列问题）
 
@@ -123,7 +120,6 @@ class Solution {
 private:
     vector<vector<int>> res;
     vector<bool> used;
-    
   	//p中保存了一个有index个元素的排列
   	//向这个排列的末尾添加第index+1个元素，获得一个有index+1个元素的排列
     void generatePermutation( const vector<int>& nums, int index, vector<int>& p ){
@@ -131,7 +127,6 @@ private:
             res.push_back(p);
             return;
         }
-        
         for(int i=0; i < nums.size(); i++){
             if( !used[i] ){ //如果该元素没有被用过，则添加到p中。　不是遍历，而是用辅助数组
                 p.push_back( nums[i] );
@@ -149,7 +144,6 @@ public:
         res.clear();
         if(nums.size() == 0)
             return res;
-        
         used = vector<bool>(nums.size(), false);
         vector<int> p;
         generatePermutation(nums, 0, p);
@@ -157,8 +151,6 @@ public:
     }
 };
 ```
-
-
 
 ### 77. Combinations　（回溯处理组合问题）
 
@@ -188,9 +180,7 @@ If *n* = 4 and *k* = 2, a solution is:
 
 ```c++
 class Solution {
-private:
     vector<vector<int>> res;
-    
   	//求解C(n,k), 当前已经找到的组合存储在c中，需要从start开始搜索新的元素
     void generateCombinations(int n, int k, int start, vector<int> &c){
         if(c.size() == k){
@@ -204,15 +194,12 @@ private:
         }
         return;
     }
-public:
     vector<vector<int>> combine(int n, int k) {
         res.clear();
         if(n<=0 || k<=0 || k>n)
             return res;
-        
         vector<int> c;
         generateCombinations(n, k, 1, c);
-        
         return res;
     }
 };
@@ -336,6 +323,8 @@ public:
 
 
 
+
+
 ### 200. Number of Islands(二维回溯，深度有限搜索)
 
 [Description](https://leetcode.com/problems/number-of-islands/description/)[Hints](https://leetcode.com/problems/number-of-islands/hints/)[Submissions](https://leetcode.com/problems/number-of-islands/submissions/)[Discuss](https://leetcode.com/problems/number-of-islands/discuss/)[Solution](https://leetcode.com/problems/number-of-islands/solution/)
@@ -367,8 +356,6 @@ Answer: 1
 ```
 
 Answer: 3
-
-
 
 ```c++
 class Solution {
@@ -499,7 +486,6 @@ private:
         }
         return;
     }
-    
     vector<string> generatedBoard(int n, vector<int> &row){
         assert( row.size() == n );
         vector<string> board(n, string(n, '.'));
@@ -510,11 +496,9 @@ private:
 public:
     vector<vector<string>> solveNQueens(int n) {
         res.clear();
-        
         col = vector<bool>(n, false);
         dia1 = vector<bool>(2*n-1, false);
         dia2 = vector<bool>(2*n-1, false);
-        
         vector<int> row;
         putQueen(n, 0, row);
         return res;
