@@ -87,7 +87,7 @@
 1. //线程1执行的代码  
 2. int i = 0;  
 3. i = 10;  
-4.    
+4.    ​
 5. //线程2执行的代码  
 6. j = i;  
 
@@ -140,7 +140,7 @@
 1. //线程1:  
 2. context = loadContext();   //语句1  
 3. inited = true;             //语句2  
-4.    
+4.    ​
 5. //线程2:  
 6. while(!inited ){  
 7.   sleep()  
@@ -266,7 +266,7 @@
 3. while(!stop){  
 4. ​    doSomething();  
 5. }  
-6.    
+6.    ​
 7. //线程2  
 8. stop = true;  
 
@@ -452,7 +452,7 @@
 
 1. //x、y为非volatile变量  
 2. //flag为volatile变量  
-3.    
+3.    ​
 4. x = 2;        //语句1  
 5. y = 0;        //语句2  
 6. flag = true;  //语句3  
@@ -470,7 +470,7 @@
 1. //线程1:  
 2. context = loadContext();   //语句1  
 3. inited = true;             //语句2  
-4.    
+4.    ​
 5. //线程2:  
 6. while(!inited ){  
 7.   sleep()  
@@ -516,16 +516,16 @@
 **[java]** [view plain](https://blog.csdn.net/jjavaboy/article/details/77164474#) [copy](https://blog.csdn.net/jjavaboy/article/details/77164474#)
 
 1. volatile boolean flag = false;  
-2.    
+2.    ​
 3. while(!flag){  
 4. ​    doSomething();  
 5. }  
-6.    
+6.    ​
 7. public void setFlag() {  
 8. ​    flag = true;  
 9. }  
 
- 
+
 
 **[java]** [view plain](https://blog.csdn.net/jjavaboy/article/details/77164474#) [copy](https://blog.csdn.net/jjavaboy/article/details/77164474#)
 
@@ -533,7 +533,7 @@
 2. //线程1:  
 3. context = loadContext();    
 4. inited = true;              
-5.    
+5.    ​
 6. //线程2:  
 7. while(!inited ){  
 8. sleep()  
