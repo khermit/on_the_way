@@ -1,5 +1,9 @@
 # 欢迎使用Markdown编辑器写博客
 
+```
+<img src="https..." style="zoom:50%" />
+```
+
 本Markdown编辑器使用[StackEdit][6]修改而来，用它写博客，将会带来全新的体验哦：
 
 - **Markdown和扩展Markdown简洁的语法**
@@ -86,8 +90,8 @@ class SomeClass:
 
 ###脚注
 生成一个脚注[^footnote].
-  [^footnote]: 这里是 **脚注** 的 *内容*.
-  
+[^footnote]: 这里是 **脚注** 的 *内容*.
+
 ### 目录
 用 `[TOC]`来生成目录：
 
@@ -99,7 +103,7 @@ class SomeClass:
  - 行内公式，数学公式为：$\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$。
  - 块级公式：
 
-$$	x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
+	$	x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
 
 更多LaTex语法请参考 [这儿][3].
 
