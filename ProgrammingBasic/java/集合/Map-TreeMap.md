@@ -41,9 +41,7 @@ static final class Entry<K,V> implements Map.Entry<K,V> {
         int valueHash = (value==null ? 0 : value.hashCode());
         return keyHash ^ valueHash;//异或,不同为1
     }
-    public String toString() {
-        return key + "=" + value;
-    }
+    public String toString() { return key + "=" + value; }
 }
 ```
 
@@ -65,33 +63,27 @@ public TreeMap() {
 public TreeMap(Comparator<? super K> comparator) {
     this.comparator = comparator;
 }
-/**
- * Constructs a new tree map containing the same mappings as the given
+/**Constructs a new tree map containing the same mappings as the given
  * map, ordered according to the <em>natural ordering</em> of its keys.
  * All keys inserted into the new map must implement the {@link
  * Comparable} interface.  Furthermore, all such keys must be
  * <em>mutually comparable</em>: {@code k1.compareTo(k2)} must not throw
  * a {@code ClassCastException} for any keys {@code k1} and
  * {@code k2} in the map.  This method runs in n*log(n) time.
- *
  * @param  m the map whose mappings are to be placed in this map
  * @throws ClassCastException if the keys in m are not {@link Comparable},
  *         or are not mutually comparable
- * @throws NullPointerException if the specified map is null
- */
+ * @throws NullPointerException if the specified map is null*/
 public TreeMap(Map<? extends K, ? extends V> m) {
     comparator = null;
     putAll(m);
 }
-/**
- * Constructs a new tree map containing the same mappings and
+/**Constructs a new tree map containing the same mappings and
  * using the same ordering as the specified sorted map.  This
  * method runs in linear time.
- *
  * @param  m the sorted map whose mappings are to be placed in this map,
  *         and whose comparator is to be used to sort this map
- * @throws NullPointerException if the specified map is null
- */
+ * @throws NullPointerException if the specified map is null */
 public TreeMap(SortedMap<K, ? extends V> m) {
     comparator = m.comparator();
     try {
@@ -105,17 +97,9 @@ public TreeMap(SortedMap<K, ? extends V> m) {
 插入:如果已经有key，则替代并返回oldValue。
 
 ```java
-/**
- * @return the previous value associated with {@code key}, or
- *         {@code null} if there was no mapping for {@code key}.
- *         (A {@code null} return can also indicate that the map
- *         previously associated {@code null} with {@code key}.)
- * @throws ClassCastException if the specified key cannot be compared
- *         with the keys currently in the map
- * @throws NullPointerException if the specified key is null
- *         and this map uses natural ordering, or its comparator
- *         does not permit null keys
- */
+/**@return the previous value associated with {@code key}, or {@code null} if there was no mapping for {@code key}. (A {@code null} return can also indicate that the map previously associated {@code null} with {@code key}.)
+ * @throws ClassCastException if the specified key cannot be compared with the keys in  map
+ * @throws NullPointerException if the specified key is null */
 public V put(K key, V value) {
     Entry<K,V> t = root;
     if (t == null) {    //如果为空，则添加为根节点
@@ -195,11 +179,17 @@ private static <K,V> Entry<K,V> rightOf(Entry<K,V> p) {
 }
 ```
 
+
+
 ### 二、红黑树的插入操作
 
 ![1534406099079](assets/1534406099079.png) 
 
 ![1534405656716](assets/1534405656716.png)
+
+
+
+
 
 调整策略：自底向上，直到根节点或平衡。在调整p节点之前，要让p的左右子树都为RBT。
 
@@ -246,10 +236,8 @@ case 2：
 ![1534407927852](assets/1534407927852.png)
 
 ```java
-            // 1.2 叔叔为黑色
-            else {
-                // 若x为右孩子
-                if (x == rightOf(parentOf(x))) {
+		 else {// 1.2 叔叔为黑色
+                if (x == rightOf(parentOf(x))) { // 若x为右孩子
                     x = parentOf(x);//x指向父亲
                     rotateLeft(x);  //左旋
                 }
@@ -270,11 +258,9 @@ case 3：
                 rotateRight(parentOf(parentOf(x)));  //右旋爷
 ```
 
- ![1534409269390](assets/1534409269390.png) 
+ 总体case：
 
-总体的case:
-
- ![1534409381233](assets/1534409381233.png)
+![1534409381233](assets/1534409381233.png)
 
 向上调整全部代码：
 
@@ -329,6 +315,10 @@ private void fixAfterInsertion(Entry<K,V> x) {
 }
 ```
 
+比较：
+
+<img src="assets/1534409269390.png" style="zoom:80%" />
+
 ### 三、红黑树的删除操作
 
   删除红色节点，不会影响BH，无需操作。
@@ -342,11 +332,23 @@ private void fixAfterInsertion(Entry<K,V> x) {
 - 是否有相同BH，X的BH本身要比别的小，所以只能不变或者增加
 - 是否连续红，需要染黑？还是回溯？
 
-高层伪代码：
+高层伪代码：（纠错：case4 P和S染黑-->P和RN染黑）
 
  ![1534483533130](assets/1534483533130.png)
 
-case4 P和S染黑-->P和RN染黑
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 需要调整的情况：
 
@@ -359,21 +361,23 @@ case4 P和S染黑-->P和RN染黑
 
   ![1534484194179](assets/1534484194179.png)
 
+  
+
 - case 2: 
 
   - 条件：兄弟S、LN、RN均为黑色
     - case2-1条件：父亲**P为黑色**
     - case2-1条件：父亲**P为红色**
   - 处理方式相同：兄弟S染红，X回溯至P
-  - case2-1：父亲P为黑色
-    - 调整后：
+  - case2-1：**父亲P为黑色**（兄弟S、LN、RN均为黑色）
+    - 调整后：（兄弟S染红，X回溯至P）
       - X的黑高不变，S的黑高减1，导致x和s黑高相同。
       - 但父亲P的黑高减小了1，真个树违反了BH相等。需要继续调整P。
     - 可转化为：所有case，因为P是黑色的。
     - 注意：**若P为根节点，则这是唯一减小真个红黑书BH的情形**。
     - ![1534485161592](assets/1534485161592.png)
-  - case2-2:父亲P为红色
-    - 调整后：
+  - case2-2:**父亲P为红色**（兄弟S、LN、RN均为黑色）
+    - 调整后：（兄弟S染红，X回溯至P）
       - 与case2-1一样，X的黑高不变，S的黑高减1，导致x和s黑高相同。
       - 与case2-1一样，但父亲P的黑高减小了1，真个树违反了BH相等。需要继续调整P。
       - 特别地：P与S违反了连续红。
@@ -554,31 +558,25 @@ private void fixAfterDeletion(Entry<K,V> x) {
 
 ![1534497761176](assets/1534497761176.png) ![1534497799666](assets/1534497799666.png) ![1534497889532](assets/1534497889532.png) 
 
-![1534497963580](assets/1534497963580.png) ![1534497987603](assets/1534497987603.png) ![1534498012316](assets/1534498012316.png)
+![1534497963580](assets/1534497963580.png) ![1534497987603](assets/1534497987603.png) 
 
-![1534498047933](assets/1534498047933.png) ![1534498068771](assets/1534498068771.png)
+![1534498012316](assets/1534498012316.png)![1534498047933](assets/1534498047933.png) 
 
-![1534498099772](assets/1534498099772.png) ![1534498119093](assets/1534498119093.png)
+![1534498068771](assets/1534498068771.png) ![1534498099772](assets/1534498099772.png) <img src="assets/1534498119093.png" style="zoom:80%" />  <img src="assets/1534498152491.png" style="zoom:80%" />
 
- ![1534498152491](assets/1534498152491.png) 
+<img src="assets/1534498193437.png" style="zoom:80%" /> <img src="assets/1534498210636.png" style="zoom:80%" />
 
-![1534498193437](assets/1534498193437.png) ![1534498210636](assets/1534498210636.png)
-
-![1534498238744](assets/1534498238744.png) ![1534498259328](assets/1534498259328.png)
-
-
+<img src="assets/1534498238744.png" style="zoom:80%" /> <img src="assets/1534498259328.png" style="zoom:80%" />
 
 ### 五、示例：红黑树的删除操作
 
 ![1534498859532](assets/1534498859532.png)
 
-示例：
+示例：<img src="https..." style="zoom:80%" />
 
-![1534498890566](assets/1534498890566.png)
+ <img src="assets/1534498890566.png" style="zoom:75%" /> <img src="assets/1534498920284.png" style="zoom:80%" />
 
-![1534498920284](assets/1534498920284.png) ![1534498939837](assets/1534498939837.png)
-
- ![1534498981495](assets/1534498981495.png)
+<img src="assets/1534498939837.png" style="zoom:90%" /> <img src="assets/1534498981495.png" style="zoom:90%" />
 
 ![1534498994881](assets/1534498994881.png) ![1534499009986](assets/1534499009986.png)
 
@@ -588,19 +586,17 @@ private void fixAfterDeletion(Entry<K,V> x) {
 
 ![1534499139634](assets/1534499139634.png) ![1534499169511](assets/1534499169511.png)
 
-![1534499182490](assets/1534499182490.png) ![1534499200649](assets/1534499200649.png)
+<img src="assets/1534499182490.png" style="zoom:90%" /> <img src="assets/1534499200649.png" style="zoom:90%" />
 
-![1534499216172](assets/1534499216172.png) ![1534499229963](assets/1534499229963.png)
+<img src="assets/1534499216172.png" style="zoom:90%" /> <img src="assets/1534499229963.png" style="zoom:95%" />
 
-![1534499248062](assets/1534499248062.png) ![1534499261074](assets/1534499261074.png)
+<img src="assets/1534499248062.png" style="zoom:93%" /> <img src="assets/1534499261074.png" style="zoom:95%" />
 
-![1534499274244](assets/1534499274244.png) ![1534499289449](assets/1534499289449.png)
+<img src="assets/1534499274244.png" style="zoom:92%" /> <img src="assets/1534499289449.png" style="zoom:92%" />
 
- ![1534499304963](assets/1534499304963.png) 
+<img src="assets/1534499304963.png " style="zoom:90%" />
 
-![1534499333734](assets/1534499333734.png)  ![1534499352281](assets/1534499352281.png)  
+<img src="assets/1534499333734.png " style="zoom:90%" /> <img src="assets/1534499352281.png " style="zoom:90%" />
 
-![1534499367113](assets/1534499367113.png) ![1534499387881](assets/1534499387881.png) 
-
-
+<img src="assets/1534499367113.png " style="zoom:90%" /> <img src="assets/1534499387881.png " style="zoom:90%" />
 
