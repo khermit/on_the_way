@@ -1,8 +1,8 @@
-## 阻塞队列
+## 阻塞队列-DelayQueue
 
 [TOC]
 
-  DelayQueue是一个支持延时获取元素的无界阻塞队列。队列使用PriorityQueue来实现。队列中的元素必须实现Delayed接口，在创建元素时可以指定多久才能从队列中获取当前元素。只有在延迟期满时才能从队列中提取元素。
+  DelayQueue是一个支持延时获取元素的无界阻塞队列。**队列使用PriorityQueue来实现**。**队列中的元素必须实现Delayed接口**，在创建元素时可以指定多久才能从队列中获取当前元素。只有在**延迟期满**时才能从队列中提取元素。
 
 ### Delayed 接口分析
 
@@ -193,19 +193,22 @@ peek并不一定是当前添加的元素，队头是当前添加元素，说明�
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();//可中断的获取锁
         try {
-            for (;;) {//无限循环
+            //无限循环，即阻塞，直到返回。
+            for (;;) {
                 E first = q.peek();//获取队头元素
-                if (first == null) {//队头为空，也就是队列为空
-                    //达到超时指定时间，返回null 
+                //1.队头为空，也就是队列为空
+                if (first == null) {
+                    //1.1达到超时指定时间，返回null 
                     if (nanos <= 0)
                         return null;
                     else
-                        // 如果还没有超时，那么再available条件上进行等待nanos时间
+                    //1.2如果还没有超时，那么再available条件上进行等待nanos时间
                         nanos = available.awaitNanos(nanos);
+                //2.对头有元素first
                 } else {
-                    //获取元素延迟时间
+                    //获取元素first延迟时间
                     long delay = first.getDelay(NANOSECONDS);
-                    //延时到期
+                    //2.1延时到期，返回first元素
                     if (delay <= 0)
                         return q.poll(); //返回出队元素
                     //延时未到期，超时到期，返回null
@@ -253,7 +256,7 @@ peek并不一定是当前添加的元素，队头是当前添加元素，说明�
 当进行超时等待时，阻塞在Condition 上后会释放锁,一旦释放了锁，那么其它线程就有可能参与竞争，某一个线程就可能会成为leader(参与竞争的时间早，并且能在等待时间内能获取到队头元素那么就可能成为leader) 
 leader是用来减少不必要的竞争,如果leader不为空说明已经有线程在取了,设置当前线程等待即可。（leader 就是一个信号，告诉其它线程：你们不要再去获取元素了，它们延迟时间还没到期，我都还没有取到数据呢，你们要取数据，等我取了再说） 
 下面用流程图来展示这一过程： 
-![这里写图片描述](https://img-blog.csdn.net/20171029184623742?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDYzNDMzOA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![1535617168507](assets/1535617168507.png)
 
 #### 3、take() :
 
@@ -264,18 +267,23 @@ leader是用来减少不必要的竞争,如果leader不为空说明已经有线�
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
+            //加锁后死循环 
             for (;;) {
-                E first = q.peek();
+                E first = q.peek();//取出队头元素
+                //1.没有元素，则available.await等带
                 if (first == null)
                     available.await();//没有元素，则等待
+                //2.有元素first
                 else {
-                    long delay = first.getDelay(NANOSECONDS);
+                    long delay = first.getDelay(NANOSECONDS);//得到firt的元素延期时间
+                    //2.1 first时间到，则返回
                     if (delay <= 0)//延迟到期
                         return q.poll();
                     first = null; // don't retain ref while waiting
-                    //如果有其它线程在等待获取元素，则当前线程不用去竞争，直接等待
+                    //2.2 如果有其它线程在等待获取元素，则当前线程不用去竞争，直接等待
                     if (leader != null)
                         available.await();
+                    //2.3 如果没有别的线程等待，则将自己的线程设为leader
                     else {
                         Thread thisThread = Thread.currentThread();
                         leader = thisThread;
@@ -298,6 +306,22 @@ leader是用来减少不必要的竞争,如果leader不为空说明已经有线�
 ```
 
 该方法就是相当于在前面的超时等待中，把超时时间设置为无限大，那么这样只要队列中有元素，要是元素延迟时间要求，那么就可以取出元素，否则就直接等待元素延迟时间到期，再取出元素，最先参与等待的线程会成为leader。
+
+思路：
+
+- 加锁
+
+- 无限循环
+  - 获取第一个元素first，没有则等待
+  - leader不为null，说明有别的线程之前就等待获取元素，我就不去竞争了，直接等available.await()
+  - 否则，没有线程等待，我将自己设置为leader，并等待first元素的延迟时间delay，调用available.awaitNanos(delay);放弃锁
+    - 获取锁后，如果在等待delay期间，leader没有变，还是自己，则将对头元素返回，leader设置为null。
+    - 返回之前，如果leader为null，并且队列中有元素，则调用available.signal();唤醒等待在avaliable上的线程去设置leader。最后解锁，真正返回。
+
+回顾插入的思路：
+
+- 加锁，插入元素，如果插入的元素在队列头部，说明新插入的元素是第一个超时返回的。
+- 要将leader置为null，并调用available.signal()来通知等待线程获取，并重新设置leader。因为之前的leader线程在等待插入之前的第一个元素的delay，而现在队头的元素delay更少，所以要重新设置。
 
 #### 4、peek()
 
