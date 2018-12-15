@@ -164,6 +164,46 @@ int& a = 10;//错误
 cosnt int & a = 10;//对常量10的内存空间取别名
 ```
 
+### 函数指针
+
+*优先级高于()
+
+函数指针：在给函数指针赋值的时候就发生重载，调用时就直接调用指定的函数即可。
+
+```c++
+int func(int a, int b){return 0}
+//方式一：定义一种函数类型
+typedef int(MY_FUNC)(int, int)
+MY_FUNC * fp = NULL;
+fp = func;
+fp(10,20);
+(*fp)(10,20);
+//方式二：定义一个指向函数类型的指针类型
+typedef int(*MY_FUNC_P)(int, int)
+MY_FUNC_P fp1 = NULL;
+fp1 = func;
+fp1(10,20);
+//方式三：
+int(*fp3)(int, int) = NULL;
+fp3 = func; 
+fp3(10,20);
+```
+
+```c++
+void(*p)() = add;//函数指针
+p();//调用
+p=add;
+p=&add
+void(*p[3])() = {add, multi, divide};//函数指针　数组
+p[1]();//调用
+void fun(int x, int(*p)(int a, int b)){ //将函数作为参数传进去
+    p(x,1);//回调函数
+}
+fun(1,add);
+```
+
+
+
 ### inline函数
 
 inline函数：
@@ -205,31 +245,6 @@ c语言中：只要函数名字相同，就是函数重定义
 void func(char a); // func_c(char a)
 void func(char a, int b, double c); // func_cid(char a, int b, double c)
 ```
-
-函数指针：在给函数指针赋值的时候就发生重载，调用时就直接调用指定的函数即可。
-
-```c++
-int func(int a, int b){return 0}
-//方式一：定义一种函数类型
-typedef int(MY_FUNC)(int, int)
-MY_FUNC * fp = NULL;
-fp = func;
-fp(10,20);
-(*fp)(10,20);
-//方式二：定义一个指向函数类型的指针类型
-typedef int(*MY_FUNC_P)(int, int)
-MY_FUNC_P fp1 = NULL;
-fp1 = func;
-fp1(10,20);
-//方式三：
-int(*fp3)(int, int) = NULL;
-fp3 = func; 
-fp3(10,20);
-```
-
-
-
-
 
 
 
