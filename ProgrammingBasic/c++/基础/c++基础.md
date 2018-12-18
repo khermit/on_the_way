@@ -248,6 +248,25 @@ void func(char a, int b, double c); // func_cid(char a, int b, double c)
 
 
 
+### 数组类型
+
+```c++
+//一、先定义一个数组类型，然后再定义一个该类型的指针指向一个数组
+typedef int(ARRAY_INT_10)[10];
+int array[10]; //array是一个指向int类型的指针
+ARRAY_INT_10 *array_10_p = &array;
+(*array_10_p)[i];//只能通过这种方式来访问，因为array_10_p+1步长为真个数组大小，跟数组名等价。
+//二、定义一个数组类型的指针
+typedef int(*ARRAY_INT_10_P)[10];
+ARRAY_INT_10_P array_10_p = &array;
+(*array_10_p)[i];
+//三、指向数组的指针,是一个指针
+int(*p)[10] = &array;
+(*p)[i];
+//补充
+int*p[10];//指针数组，是一个数组
+```
+
 
 
 
