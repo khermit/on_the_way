@@ -42,5 +42,13 @@ int main(){
     A<char> a2;
 
     cout << "hello" << endl;
+
+    int a = 10;
+    const int& b = a;
+    int& c = const_cast<int&>(b);
+    cout << b << ' ';
+    c = 20;
+    cout << c << ' ' << b << endl;
+
     return 0;
 }

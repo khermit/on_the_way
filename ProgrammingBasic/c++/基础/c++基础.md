@@ -269,11 +269,206 @@ int*p[10];//指针数组，是一个数组
 
 
 
+### 数据类型转换
+
+c++是严格的数据类型。所以数据转换较为安全。
+
+1. static_cast：内置的基本类型转换，具有继承关系的指针/引用（父转子、子转父）。
+
+```c++
+int a = 10;
+char c = static_cast<char>(a);
+```
+
+2. dynamic_cast：转换具有**继承关系**的指针/引用，在转换前会进行对象类型安全检查（父类转为子类不安全），即**只能由子类转为父类**。
+
+3. const_cast：对指针／引用／对象指针取消掉/添加const。
+
+   ```c++
+   int a = 10;
+   const int& b = a;
+   int& c = const_cast<int&>(b);
+   c = 20;    
+   ```
+
+4. reinterpret_cast：强制类型转换，无关的指针类型都可以转换，包括函数指针。
 
 
 
+### 异常
+
+- 函数的返回值可以忽略，但异常不能忽略，没有捕获异常，就会终止。异常作为一个类，可以传递足够的信息。
+- c++异常跨函数，底层函数抛出异常，上级函数没有捕获的话，会自动往上抛，若main函数中还没有捕获，则终止。
+
+```c++
+int divide(int x, int y){
+    Person p;
+    if ( 0 == y )
+        throw y; //抛一个int类型异常。抛出时，前面的对象将回收/析构（占解旋）
+    return x / y;
+}
+void test01(){
+    try{
+        divide(10,0);
+    } catch(int e){　//捕获int类型异常
+        cout << "捕获到整形异常" << e << endl;
+    } catch(...){ //捕获所有异常
+        
+    }
+}
+```
+
+```c++
+//该函数只能抛出指定的异常，否则报错。
+void func() throw(int, float, char){
+    
+}
+void func1 throw(){}//不能抛出任何异常
+void func2{}//可以抛出任何类型的异常
+
+```
+
+异常对象的声明周期：
+
+最**好使用引用，只会调用一次构造**。使用指针时需要谨慎。
+
+1. 普通类型：会调用构造函数和拷贝构造，共两个对象，都在catch之后析构
+
+```c++
+void func(){
+    throw MyException(); // 1.创建匿名对象
+}
+void test(){
+    try{
+        func();
+    }
+    catch (MyException e){ // 2.通过拷贝构造创建对象e
+        cout << "异常捕获"　<< endl;
+    } // 3.调用匿名对象和e的析构
+}
+```
+
+2. 引用类型：会调用构造函数，共1个对象，都在catch之后析构
+
+```c++
+void func(){
+    throw MyException(); // 1.创建匿名对象
+}
+void test(){
+    try{
+        func();
+    }
+    catch (MyException& e){ // 2.将匿名对象提升为e
+        cout << "异常捕获"　<< endl;
+    } // 3.调e的析构
+}
+```
+3. 1指针类型：会调用构造函数，共1个对象，但是在catch之前析构
+
+```c++
+void func(){
+    throw &(MyException()); // 1.创建匿名对象
+}
+void test(){
+    try{
+        func();
+    }
+    catch (MyException* e){ // 2.析构e，无法在后面使用该对象
+        cout << "异常捕获"　<< endl;
+    } 
+}
+```
+3. 2指针类型：会调用构造函数，共1个对象，但是在catch之前析构
+
+```c++
+void func(){
+    throw new MyException(); // 1.手动创建对象，需要手动释放。
+}
+void test(){
+    try{
+        func();
+    }
+    catch (MyException* e){ // 2.使用e
+        cout << "异常捕获"　<< endl;
+        delete e; //3. 手动释放
+    } 
+}
+```
+
+c++标准库的异常：exception是所有异常类的父类。重载父类的what函数和虚析构函数。
+
+![creenshot from 2018-12-19 14-39-0](/home/quandk/Pictures/Screenshot from 2018-12-19 14-39-07.png)
+
+```c++
+class MyOutOfRange : public exception{
+public:
+    char* pError;
+public:
+    MyOutOfRange(char* error){
+        pError = new char[strlen(error)+1];
+        strcpy(pError, error);
+    }
+    ~MyOutOfRange(){
+        if( NULL != pError ){
+            delete[] pError;
+        }
+    }
+    vitrual const char * what() const{
+        return pError;
+    }
+}
+```
 
 
+
+### 输入输出
+
+p759
+
+cerr没有缓冲区，clog有缓冲区。键盘上的EOF：ctrl+z
+
+- cin.get() :一次读一个字符。键盘回车时，输入的字符才放入缓冲区。
+- cin.get(ch)：读取一个字符
+- cin.get(buf, 256)：从缓冲区读一个字符串
+- cin.getline(buf,256); 读一行数据，不读取换行符
+
+```c++
+ 
+```
+
+#### 文件操作
+
+```c++
+//文本文件，windows下将\r\n转为\n，linux则不用转。
+char* fileName = "a.txt";
+ifstream ism(fileName, iso:im); //只读方式打开文件
+if( !ism ){
+    return;
+}
+char ch;
+while(ism.get(ch)){
+    cout<<ch;
+}
+ism.close();
+ofstream osm(fileName, iso:out);//写 iso:out | iso:app 追加
+osm.put(ch);
+osm.close();
+```
+对象序列化
+
+```c++
+//二进制文件
+Person p(10);//内存中为二进制
+ofstream osm(fileName, iios::out|iso::binary); //二进制写
+osm.wirte((char*)&p, sizeof(Person));
+osm.close;
+//读
+ifstream ism(fileName, ios::in | ios::binary);
+Person p;
+ism.read((char*)&p, sizeof(Person));
+p.show();
+ism.close;
+```
 
 
 
